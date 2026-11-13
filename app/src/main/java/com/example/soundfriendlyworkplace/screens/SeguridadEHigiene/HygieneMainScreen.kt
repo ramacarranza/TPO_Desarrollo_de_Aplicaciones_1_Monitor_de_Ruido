@@ -91,8 +91,13 @@ fun HygieneMainScreen() {
                 )
 
                 "alerts" -> HygieneAlertsScreen(
-                    onAlertClick = {
-                        pantalla = "alertDetail"
+                    onAlertClick = { id ->
+                        val alertaId = id.toIntOrNull()
+
+                        if (alertaId != null && alertaId > 0) {
+                            alertaIdSeleccionada = alertaId
+                            pantalla = "alertDetail"
+                        }
                     },
                     onViewSectors = {
                         pantalla = "home"
