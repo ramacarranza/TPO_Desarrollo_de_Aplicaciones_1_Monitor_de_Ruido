@@ -1,0 +1,48 @@
+# Infraestructura local del TP Monitor de ruido (tarea 7 del plan)
+# Levantar:  docker compose up -d
+services:
+  db:
+    image: timescale/timescaledb:2.17.2-pg16
+    container_name: ruido-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "127.0.0.1:15432:5432"       # solo desde esta PC. 15432 porque Windows reservó 5381-5480 (WSL/Hyper-V)
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Aplica las migraciones de db/migration y termina.
+  # Ktor (tarea 8) usa las mismas migraciones con Flyway, así que no hay conflicto.
+  flyway:
+    image: flyway/flyway:10.20.1
+    container_name: ruido-flyway
+    depends_on:
+      db:
+        condition: service_healthy
+    command: -url=jdbc:postgresql://db:5432/${POSTGRES_DB} -user=${POSTGRES_USER} -password=${POSTGRES_PASSWORD} -connectRetries=10 migrate
+    volumes:
+      - ./db/migration:/flyway/sql:ro
+
+  mosquitto:
+    image: eclipse-mosquitto:2.0.20
+    container_name: ruido-mqtt
+    restart: unless-stopped
+    ports:
+      - "1883:1883"                    # abierto a la red local para que llegue el ESP32
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+      - mqtt-data:/mosquitto/data
+      - mqtt-log:/mosquitto/log
+
+volumes:
+  db-data:
+  mqtt-data:
+  mqtt-log:

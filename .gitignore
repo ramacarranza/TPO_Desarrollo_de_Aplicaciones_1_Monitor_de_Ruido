@@ -1,0 +1,25 @@
+# --- Secretos locales (se sube backend/.env.example en su lugar) ---
+backend/.env
+.env
+
+# --- Compilación y caches ---
+**/build/
+**/.gradle/
+**/.idea/
+*.iml
+local.properties
+firmware/.pio/
+firmware/.vscode/.browse.c_cpp.db*
+firmware/.vscode/c_cpp_properties.json
+firmware/.vscode/launch.json
+firmware/.vscode/ipch
+
+# --- Backups del firmware ---
+*.bak
+
+# --- Grabaciones crudas del video (pesadas); las animaciones finales sí se suben ---
+video/grabaciones/
+
+# --- Sistema operativo ---
+.DS_Store
+Thumbs.db
