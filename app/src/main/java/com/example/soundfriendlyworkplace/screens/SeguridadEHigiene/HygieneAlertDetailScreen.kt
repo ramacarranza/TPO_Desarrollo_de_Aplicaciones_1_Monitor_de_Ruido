@@ -28,13 +28,28 @@ import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.remember
+import com.example.soundfriendlyworkplace.data.local.DatabaseProvider
+import com.example.soundfriendlyworkplace.data.repository.AlertaRepository
+import com.example.soundfriendlyworkplace.viewmodel.AlertaViewModelFactory
 
 @Composable
 fun HygieneAlertDetailScreen(
     alertaId: Int,
     onBack: () -> Unit
 ) {
-    val alertaViewModel: AlertaViewModel = viewModel()
+    val context = LocalContext.current
+
+    val factory = remember {
+        val database = DatabaseProvider.obtenerBaseDeDatos(context)
+        val repository = AlertaRepository(database.alertaDao())
+        AlertaViewModelFactory(repository)
+    }
+
+    val alertaViewModel: AlertaViewModel = viewModel(
+        factory = factory
+    )
 
     LaunchedEffect(alertaId) {
         alertaViewModel.cargarAlertaPorId(alertaId)

@@ -23,21 +23,28 @@ class SectorRepository(
     private val api: ApiService = RetrofitClient.api
 ) {
 
+
     suspend fun obtenerSectores(): ResultadoSectores {
         return try {
+            // Obtenemos los sectores del backend.
             val sectores = api.obtenerSectores()
 
-            sectorDao.guardarSectores(
+            // Actualizamos Room en una sola transacción.
+            sectorDao.reemplazarSectores(
                 sectores.map { it.aEntity() }
             )
 
+            // Leemos los datos confirmados en Room.
+            val sectoresGuardados = sectorDao.obtenerSectores()
+
             ResultadoSectores(
-                sectores = sectores,
+                sectores = sectoresGuardados.map { it.aDto() },
                 desdeCache = false
             )
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            // Si falla la actualización, usamos los datos anteriores.
             val sectoresGuardados = sectorDao.obtenerSectores()
 
             if (sectoresGuardados.isEmpty()) {
@@ -51,23 +58,32 @@ class SectorRepository(
         }
     }
 
+
+
     suspend fun obtenerSectorPorId(id: Int): ResultadoSector {
         return try {
+            // Obtenemos el sector desde el backend.
             val sector = api.obtenerSectorPorId(id)
 
+            // Guardamos o actualizamos el sector en Room.
             sectorDao.guardarSectores(
                 listOf(sector.aEntity())
             )
 
+            // Leemos el sector guardado en Room.
+            val sectorGuardado = sectorDao.obtenerSectorPorId(id)
+                ?: throw IllegalStateException("No se encontró el sector guardado.")
+
             ResultadoSector(
-                sector = sector,
+                sector = sectorGuardado.aDto(),
                 desdeCache = false
             )
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
-            val sectorGuardado =
-                sectorDao.obtenerSectorPorId(id) ?: throw e
+            // Si falla la actualización, intentamos usar la caché.
+            val sectorGuardado = sectorDao.obtenerSectorPorId(id)
+                ?: throw e
 
             ResultadoSector(
                 sector = sectorGuardado.aDto(),

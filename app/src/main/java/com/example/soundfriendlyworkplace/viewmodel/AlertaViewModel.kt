@@ -14,7 +14,8 @@ sealed interface AlertasUiState {
     data object Cargando : AlertasUiState
 
     data class Exito(
-        val alertas: List<AlertaDto>
+        val alertas: List<AlertaDto>,
+        val desdeCache: Boolean = false
     ) : AlertasUiState
 
     data class Error(
@@ -26,7 +27,8 @@ sealed interface AlertaDetalleUiState {
     data object Cargando : AlertaDetalleUiState
 
     data class Exito(
-        val alerta: AlertaDto
+        val alerta: AlertaDto,
+        val desdeCache: Boolean = false
     ) : AlertaDetalleUiState
 
     data class Error(
@@ -35,7 +37,7 @@ sealed interface AlertaDetalleUiState {
 }
 
 class AlertaViewModel(
-    private val repository: AlertaRepository = AlertaRepository()
+    private val repository: AlertaRepository
 ) : ViewModel() {
 
     var alertasUiState by mutableStateOf<AlertasUiState>(
@@ -48,6 +50,12 @@ class AlertaViewModel(
     )
         private set
 
+    var reconociendoAlerta by mutableStateOf(false)
+        private set
+
+    var errorReconocimiento by mutableStateOf<String?>(null)
+        private set
+
     init {
         cargarAlertas()
     }
@@ -57,14 +65,17 @@ class AlertaViewModel(
             alertasUiState = AlertasUiState.Cargando
 
             alertasUiState = try {
+                val resultado = repository.obtenerAlertas()
+
                 AlertasUiState.Exito(
-                    repository.obtenerAlertas()
+                    alertas = resultado.alertas,
+                    desdeCache = resultado.desdeCache
                 )
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
                 AlertasUiState.Error(
-                    "No se pudieron cargar las alertas. Revisá la conexión."
+                    "No se pudieron cargar las alertas y no hay datos guardados."
                 )
             }
         }
@@ -74,36 +85,18 @@ class AlertaViewModel(
         viewModelScope.launch {
             alertaDetalleUiState = AlertaDetalleUiState.Cargando
 
-            android.util.Log.d(
-                "ALERTA_DETALLE",
-                "Consultando alerta con ID: $id"
-            )
-
             alertaDetalleUiState = try {
+                val resultado = repository.obtenerAlertaPorId(id)
+
                 AlertaDetalleUiState.Exito(
-                    repository.obtenerAlertaPorId(id)
+                    alerta = resultado.alerta,
+                    desdeCache = resultado.desdeCache
                 )
             } catch (e: CancellationException) {
                 throw e
-            } catch (e: retrofit2.HttpException) {
-                android.util.Log.e(
-                    "ALERTA_DETALLE",
-                    "Error HTTP ${e.code()} al consultar alerta ID: $id",
-                    e
-                )
-
-                AlertaDetalleUiState.Error(
-                    "Error HTTP ${e.code()} al consultar alerta $id"
-                )
             } catch (e: Exception) {
-                android.util.Log.e(
-                    "ALERTA_DETALLE",
-                    "Error al consultar alerta ID: $id",
-                    e
-                )
-
                 AlertaDetalleUiState.Error(
-                    "Error: ${e.message ?: "Desconocido"}"
+                    "No se pudo cargar la alerta y no hay datos guardados."
                 )
             }
         }

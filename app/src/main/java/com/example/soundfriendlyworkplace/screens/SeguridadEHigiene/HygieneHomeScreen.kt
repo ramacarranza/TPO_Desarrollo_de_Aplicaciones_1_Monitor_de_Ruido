@@ -11,21 +11,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
 import com.example.soundfriendlyworkplace.data.model.SectorDto
 import com.example.soundfriendlyworkplace.data.model.SensorDto
 import com.example.soundfriendlyworkplace.ui.theme.*
@@ -43,30 +35,6 @@ fun HygieneHomeScreen(
     onViewAlerts: () -> Unit = {},
     hygieneViewModel: HygieneViewModel
 ) {
-    val lifecycleOwner = LocalLifecycleOwner.current
-
-    var primeraApertura by remember(hygieneViewModel) {
-        mutableStateOf(true)
-    }
-
-    DisposableEffect(lifecycleOwner, hygieneViewModel) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                if (primeraApertura) {
-                    // El ViewModel ya carga los sectores al crearse.
-                    primeraApertura = false
-                } else {
-                    hygieneViewModel.cargarSectores()
-                }
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
-    }
 
     HygieneHomeContent(
         estado = hygieneViewModel.sectoresUiState,

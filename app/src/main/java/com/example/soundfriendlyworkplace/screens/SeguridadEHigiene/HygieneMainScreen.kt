@@ -102,9 +102,6 @@ fun HygieneMainScreen() {
                     onViewSectors = {
                         pantalla = "home"
                     },
-                    onViewSensors = {
-                        pantalla = "sensors"
-                    }
                 )
 
                 "alertDetail" -> HygieneAlertDetailScreen(
@@ -112,16 +109,6 @@ fun HygieneMainScreen() {
                     onBack = {
                         pantalla = "alerts"
                     }
-                )
-
-                "sensors" -> HygieneSensorsScreen()
-
-                "history" -> PantallaPendiente(
-                    titulo = "Historial"
-                )
-
-                "profile" -> PantallaPendiente(
-                    titulo = "Perfil"
                 )
 
                 else -> PantallaPendiente(

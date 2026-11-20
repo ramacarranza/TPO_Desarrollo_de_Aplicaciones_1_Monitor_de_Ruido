@@ -22,6 +22,9 @@ import com.example.soundfriendlyworkplace.ui.theme.*
 import com.example.soundfriendlyworkplace.viewmodel.HygieneViewModel
 import com.example.soundfriendlyworkplace.viewmodel.SectorDetalleUiState
 import java.util.Locale
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 
 // Pantalla real: obtiene los datos del backend.
 @Composable
@@ -196,7 +199,11 @@ private fun HygieneSectorContent(
                             )
 
                             Text(
-                                text = "Datos del backend",
+                                text = if (estado.desdeCache) {
+                                    "Datos guardados · Sin conexión"
+                                } else {
+                                    "Datos del servidor"
+                                },
                                 fontSize = 10.sp,
                                 color = TextoSecundario
                             )
@@ -205,6 +212,13 @@ private fun HygieneSectorContent(
 
                     Spacer(modifier = Modifier.height(20.dp))
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Última medición: ${formatearFechaSector(sector.ultimaActualizacion)}",
+                    fontSize = 12.sp,
+                    color = TextoSecundario
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -236,6 +250,23 @@ private fun HygieneSectorContent(
                 Spacer(modifier = Modifier.height(20.dp))
             }
         }
+    }
+}
+
+private fun formatearFechaSector(fecha: String?): String {
+    if (fecha.isNullOrBlank()) return "Sin datos"
+
+    return try {
+        Instant.parse(fecha)
+            .atZone(ZoneId.systemDefault())
+            .format(
+                DateTimeFormatter.ofPattern(
+                    "dd/MM/yyyy HH:mm",
+                    Locale.forLanguageTag("es-AR")
+                )
+            )
+    } catch (e: Exception) {
+        "Fecha no disponible"
     }
 }
 
