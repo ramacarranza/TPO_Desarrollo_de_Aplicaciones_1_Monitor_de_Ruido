@@ -16,7 +16,10 @@ Sensor ESP32 ──WiFi/MQTT (QoS 1)──► Broker Mosquitto ──► Backend
                                                    TimescaleDB (PostgreSQL)
 ```
 
-Animación del recorrido de una medición: [presentacion/animacion_1_arquitectura.mp4](presentacion/animacion_1_arquitectura.mp4)
+Animaciones explicativas (en `presentacion/`):
+- [Cómo viaja una medición](presentacion/animacion_1_arquitectura.mp4)
+- [Corte de red sin pérdida de datos](presentacion/animacion_2_corte_de_red.mp4)
+- [Ciclo de vida de una alerta](presentacion/animacion_3_ciclo_de_alerta.mp4)
 
 ## Estructura del repositorio
 
