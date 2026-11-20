@@ -2,6 +2,7 @@ package com.example.soundfriendlyworkplace.data.repository
 
 import com.example.soundfriendlyworkplace.data.local.SectorDao
 import com.example.soundfriendlyworkplace.data.local.SectorEntity
+import com.example.soundfriendlyworkplace.data.model.MedicionDto
 import com.example.soundfriendlyworkplace.data.model.SectorDto
 import com.example.soundfriendlyworkplace.data.model.SensorDto
 import com.example.soundfriendlyworkplace.data.remote.ApiService
@@ -90,6 +91,10 @@ class SectorRepository(
                 desdeCache = true
             )
         }
+    }
+
+    suspend fun obtenerMediciones(sectorId: Int): List<MedicionDto> {
+        return api.obtenerMediciones(sectorId)
     }
 }
 

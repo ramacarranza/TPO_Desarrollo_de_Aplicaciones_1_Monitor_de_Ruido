@@ -1,9 +1,11 @@
 package com.example.soundfriendlyworkplace.data.remote
 
 import com.example.soundfriendlyworkplace.data.model.AlertaDto
+import com.example.soundfriendlyworkplace.data.model.MedicionDto
 import com.example.soundfriendlyworkplace.data.model.SectorDto
 import retrofit2.http.GET
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface ApiService {
 
@@ -22,6 +24,12 @@ interface ApiService {
     suspend fun obtenerAlertaPorId(
         @Path("id") id: Int
     ): AlertaDto
+
+    @GET("api/v1/sectores/{id}/mediciones")
+    suspend fun obtenerMediciones(
+        @Path("id") sectorId: Int,
+        @Query("agrupar") agrupar: String = "15m"
+    ): List<MedicionDto>
 }
 
 

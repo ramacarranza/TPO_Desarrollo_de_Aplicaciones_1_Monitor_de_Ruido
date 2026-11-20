@@ -35,10 +35,12 @@ fun HygieneSectorScreen(
 ) {
     LaunchedEffect(sectorId) {
         hygieneViewModel.cargarSectorPorId(sectorId)
+        hygieneViewModel.cargarMediciones(sectorId)
     }
 
     HygieneSectorContent(
         estado = hygieneViewModel.sectorDetalleUiState,
+        medicionesEstado = hygieneViewModel.medicionesUiState,
         onBack = onBack,
         onReintentar = {
             hygieneViewModel.cargarSectorPorId(sectorId)
@@ -51,6 +53,7 @@ fun HygieneSectorScreen(
 private fun HygieneSectorContent(
     estado: SectorDetalleUiState,
     onBack: () -> Unit = {},
+    medicionesEstado: HygieneViewModel.MedicionesUiState = HygieneViewModel.MedicionesUiState.Cargando,
     onReintentar: () -> Unit = {}
 ) {
     Column(

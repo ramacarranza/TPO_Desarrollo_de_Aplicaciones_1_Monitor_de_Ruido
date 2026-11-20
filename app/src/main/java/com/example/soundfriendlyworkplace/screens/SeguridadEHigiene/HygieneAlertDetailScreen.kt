@@ -91,6 +91,15 @@ fun HygieneAlertDetailScreen(
             }
 
             is AlertaDetalleUiState.Exito -> {
+                if (estado.desdeCache) {
+                    Text(
+                        text = "Datos guardados · Sin conexión",
+                        color = TextoSecundario,
+                        fontSize = 12.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
                 HygieneAlertDetailContent(
                     alerta = estado.alerta
                 )

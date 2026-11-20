@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.soundfriendlyworkplace.data.model.MedicionDto
 import com.example.soundfriendlyworkplace.data.model.SectorDto
 import com.example.soundfriendlyworkplace.data.repository.SectorRepository
 import kotlinx.coroutines.CancellationException
@@ -53,8 +54,30 @@ class HygieneViewModel(
     )
         private set
 
+    var medicionesUiState by mutableStateOf<MedicionesUiState>(
+        MedicionesUiState.Cargando
+    )
+        private set
+
     init {
         cargarSectores()
+    }
+
+    fun cargarMediciones(sectorId: Int) {
+        viewModelScope.launch {
+            medicionesUiState = MedicionesUiState.Cargando
+
+            medicionesUiState = try {
+                val mediciones = repository.obtenerMediciones(sectorId)
+                MedicionesUiState.Exito(mediciones)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                MedicionesUiState.Error(
+                    "No se pudieron cargar las mediciones."
+                )
+            }
+        }
     }
 
     fun cargarSectores() {
@@ -97,6 +120,18 @@ class HygieneViewModel(
                 )
             }
         }
+    }
+    sealed interface MedicionesUiState {
+
+        data object Cargando : MedicionesUiState
+
+        data class Exito(
+            val mediciones: List<MedicionDto>
+        ) : MedicionesUiState
+
+        data class Error(
+            val mensaje: String
+        ) : MedicionesUiState
     }
 }
 
