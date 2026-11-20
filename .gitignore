@@ -17,8 +17,8 @@ firmware/.vscode/ipch
 # --- Backups del firmware ---
 *.bak
 
-# --- Grabaciones crudas del video (pesadas); las animaciones finales sí se suben ---
-video/grabaciones/
+# --- Grabaciones crudas y videos pesados (GitHub no acepta archivos de más de 100 MB) ---
+presentacion/grabaciones/
 
 # --- Sistema operativo ---
 .DS_Store

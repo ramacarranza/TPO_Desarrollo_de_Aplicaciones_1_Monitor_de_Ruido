@@ -16,7 +16,7 @@ Sensor ESP32 ──WiFi/MQTT (QoS 1)──► Broker Mosquitto ──► Backend
                                                    TimescaleDB (PostgreSQL)
 ```
 
-Animación del recorrido de una medición: [video/animacion_1_arquitectura.mp4](video/animacion_1_arquitectura.mp4)
+Animación del recorrido de una medición: [presentacion/animacion_1_arquitectura.mp4](presentacion/animacion_1_arquitectura.mp4)
 
 ## Estructura del repositorio
 
@@ -26,7 +26,7 @@ Animación del recorrido de una medición: [video/animacion_1_arquitectura.mp4](
 | `backend/` | Docker Compose (TimescaleDB, Mosquitto, Flyway), migraciones SQL y API en Ktor |
 | `backend/db/migration/` | Esquema de la base y datos de demo (V1 a V5) |
 | `backend/api/` | Backend en Kotlin: ingesta MQTT, reglas de alertas, API REST y simulador |
-| `video/` | Animaciones explicativas para el video de la defensa |
+| `presentacion/` | Video de presentación (enlace en este README), animaciones explicativas y material de la defensa |
 | `app/` | App Android (se agrega cuando esté lista) |
 
 ## Dispositivo
