@@ -25,6 +25,7 @@ import java.util.Locale
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.Duration
 
 // Pantalla real: obtiene los datos del backend.
 @Composable
@@ -222,6 +223,29 @@ private fun HygieneSectorContent(
                     fontSize = 12.sp,
                     color = TextoSecundario
                 )
+                val minutosSinMedicion = try {
+                    sector.ultimaActualizacion?.let {
+                        Duration.between(
+                            Instant.parse(it),
+                            Instant.now()
+                        ).toMinutes()
+                    }
+                } catch (e: Exception) {
+                    null
+                }
+
+                if (!estado.desdeCache &&
+                    minutosSinMedicion != null &&
+                    minutosSinMedicion > 3
+                ) {
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "Última medición hace $minutosSinMedicion min",
+                        fontSize = 12.sp,
+                        color = Color(0xFF996000)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -243,11 +267,34 @@ private fun HygieneSectorContent(
 
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    Text(
-                        text = "Gráfico de mediciones pendiente de integrar",
-                        fontSize = 12.sp,
-                        color = TextoSecundario
-                    )
+                    when (medicionesEstado) {
+
+                        is HygieneViewModel.MedicionesUiState.Cargando -> {
+                            CircularProgressIndicator()
+                        }
+
+                        is HygieneViewModel.MedicionesUiState.Error -> {
+                            Text(
+                                text = medicionesEstado.mensaje,
+                                fontSize = 12.sp,
+                                color = TextoSecundario
+                            )
+                        }
+
+                        is HygieneViewModel.MedicionesUiState.Exito -> {
+                            if (medicionesEstado.mediciones.isEmpty()) {
+                                Text(
+                                    text = "No hay mediciones disponibles para este turno.",
+                                    fontSize = 12.sp,
+                                    color = TextoSecundario
+                                )
+                            } else {
+                                GraficoRuido(
+                                    mediciones = medicionesEstado.mediciones
+                                )
+                            }
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(20.dp))

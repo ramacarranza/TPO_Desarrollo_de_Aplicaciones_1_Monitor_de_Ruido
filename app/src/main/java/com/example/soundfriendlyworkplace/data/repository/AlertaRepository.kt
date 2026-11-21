@@ -4,6 +4,7 @@ package com.example.soundfriendlyworkplace.data.repository
 import com.example.soundfriendlyworkplace.data.local.AlertaDao
 import com.example.soundfriendlyworkplace.data.local.AlertaEntity
 import com.example.soundfriendlyworkplace.data.model.AlertaDto
+import com.example.soundfriendlyworkplace.data.model.ReconocerAlertaRequest
 import com.example.soundfriendlyworkplace.data.remote.ApiService
 import com.example.soundfriendlyworkplace.data.remote.RetrofitClient
 import kotlinx.coroutines.CancellationException
@@ -82,8 +83,24 @@ class AlertaRepository(
         }
     }
 
-    // TODO: Integrar el reconocimiento cuando Rami confirme
-    // el método HTTP, la ruta y el cuerpo de la petición.
+    suspend fun reconocerAlerta(
+        alertaId: Int,
+        reconocidaPor: String
+    ): AlertaDto {
+
+        val alertaActualizada = api.reconocerAlerta(
+            alertaId = alertaId,
+            solicitud = ReconocerAlertaRequest(
+                reconocidaPor = reconocidaPor
+            )
+        )
+
+        alertaDao.guardarAlertas(
+            listOf(alertaActualizada.aEntity())
+        )
+
+        return alertaActualizada
+    }
 }
 
 private fun AlertaDto.aEntity(): AlertaEntity {

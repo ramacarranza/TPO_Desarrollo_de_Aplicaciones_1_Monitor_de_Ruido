@@ -60,6 +60,37 @@ class AlertaViewModel(
         cargarAlertas()
     }
 
+    fun reconocerAlerta(alertaId: Int, reconocidaPor: String) {
+        if (reconociendoAlerta) return
+
+        viewModelScope.launch {
+            reconociendoAlerta = true
+            errorReconocimiento = null
+
+            try {
+                val alertaActualizada = repository.reconocerAlerta(
+                    alertaId = alertaId,
+                    reconocidaPor = reconocidaPor
+                )
+
+                alertaDetalleUiState = AlertaDetalleUiState.Exito(
+                    alerta = alertaActualizada,
+                    desdeCache = false
+                )
+
+                cargarAlertas()
+
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                errorReconocimiento =
+                    "No se pudo reconocer la alerta. Verificá la conexión."
+            } finally {
+                reconociendoAlerta = false
+            }
+        }
+    }
+
     fun cargarAlertas() {
         viewModelScope.launch {
             alertasUiState = AlertasUiState.Cargando

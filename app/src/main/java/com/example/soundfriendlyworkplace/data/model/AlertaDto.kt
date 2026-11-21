@@ -18,5 +18,8 @@ data class AlertaDto(
     val intervenciones: List<IntervencionDto> = emptyList()
 )
 
+data class ReconocerAlertaRequest(
+    val reconocidaPor: String
+)
 
 

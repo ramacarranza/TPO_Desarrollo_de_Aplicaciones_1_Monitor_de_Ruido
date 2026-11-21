@@ -2,10 +2,13 @@ package com.example.soundfriendlyworkplace.data.remote
 
 import com.example.soundfriendlyworkplace.data.model.AlertaDto
 import com.example.soundfriendlyworkplace.data.model.MedicionDto
+import com.example.soundfriendlyworkplace.data.model.ReconocerAlertaRequest
 import com.example.soundfriendlyworkplace.data.model.SectorDto
 import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
+import retrofit2.http.POST
+import retrofit2.http.Body
 
 interface ApiService {
 
@@ -30,6 +33,12 @@ interface ApiService {
         @Path("id") sectorId: Int,
         @Query("agrupar") agrupar: String = "15m"
     ): List<MedicionDto>
+
+    @POST("api/v1/alertas/{id}/reconocer")
+    suspend fun reconocerAlerta(
+        @Path("id") alertaId: Int,
+        @Body solicitud: ReconocerAlertaRequest
+    ): AlertaDto
 }
 
 

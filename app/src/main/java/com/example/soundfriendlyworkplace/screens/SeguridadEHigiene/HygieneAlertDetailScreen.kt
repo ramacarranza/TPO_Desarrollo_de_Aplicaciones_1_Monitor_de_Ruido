@@ -33,6 +33,9 @@ import androidx.compose.runtime.remember
 import com.example.soundfriendlyworkplace.data.local.DatabaseProvider
 import com.example.soundfriendlyworkplace.data.repository.AlertaRepository
 import com.example.soundfriendlyworkplace.viewmodel.AlertaViewModelFactory
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.*
 
 @Composable
 fun HygieneAlertDetailScreen(
@@ -101,7 +104,13 @@ fun HygieneAlertDetailScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                 }
                 HygieneAlertDetailContent(
-                    alerta = estado.alerta
+                    alerta = estado.alerta,
+                    desdeCache = estado.desdeCache,
+                    reconociendo = alertaViewModel.reconociendoAlerta,
+                    errorReconocimiento = alertaViewModel.errorReconocimiento,
+                    onReconocer = { nombre ->
+                        alertaViewModel.reconocerAlerta(alertaId, nombre)
+                    }
                 )
             }
 
@@ -129,8 +138,15 @@ fun HygieneAlertDetailScreen(
 
 @Composable
 private fun HygieneAlertDetailContent(
-    alerta: AlertaDto
+    alerta: AlertaDto,
+    desdeCache: Boolean = false,
+    reconociendo: Boolean = false,
+    errorReconocimiento: String? = null,
+    onReconocer: (String) -> Unit = {}
 ) {
+    var mostrarDialogo by remember { mutableStateOf(false) }
+    var nombreUsuario by remember { mutableStateOf("") }
+
     val colorAlerta = when (alerta.tipo) {
         "CRITICO" -> Color(0xFFC62828)
         "ATENCION" -> Color(0xFFE69A27)
@@ -310,17 +326,20 @@ private fun HygieneAlertDetailContent(
     Spacer(modifier = Modifier.height(20.dp))
 
     if (alerta.estado == "PENDIENTE") {
-        Text(
-            text = "El reconocimiento estará disponible cuando se integre con el backend.",
-            fontSize = 12.sp,
-            color = TextoSecundario
-        )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        if (desdeCache) {
+            Text(
+                text = "Necesitás conexión para reconocer esta alerta.",
+                fontSize = 12.sp,
+                color = TextoSecundario
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+        }
 
         Button(
-            onClick = {},
-            enabled = false,
+            onClick = { mostrarDialogo = true },
+            enabled = !desdeCache && !reconociendo,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(30.dp),
             colors = ButtonDefaults.buttonColors(
@@ -328,14 +347,69 @@ private fun HygieneAlertDetailContent(
                 contentColor = Color(0xFF5C35A0)
             )
         ) {
-            Text("Reconocer alerta")
+            Text(
+                if (reconociendo) "Reconociendo..."
+                else "Reconocer alerta"
+            )
         }
-    } else if (alerta.reconocidaEn != null) {
+
+        if (errorReconocimiento != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = errorReconocimiento,
+                color = Color(0xFFC62828),
+                fontSize = 12.sp
+            )
+        }
+
+    } else if (alerta.estado == "RECONOCIDA" || alerta.reconocidaEn != null) {
         Text(
             text = "✓ Alerta reconocida",
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF2E7D32)
+        )
+    }
+
+    if (mostrarDialogo && alerta.estado == "PENDIENTE") {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogo = false },
+            title = {
+                Text("Reconocer alerta")
+            },
+            text = {
+                Column {
+                    Text("Ingresá tu nombre para registrar el reconocimiento.")
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = nombreUsuario,
+                        onValueChange = { nombreUsuario = it },
+                        label = { Text("Nombre") },
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onReconocer(nombreUsuario.trim())
+                        mostrarDialogo = false
+                    },
+                    enabled = nombreUsuario.isNotBlank() && !reconociendo
+                ) {
+                    Text("Confirmar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { mostrarDialogo = false }
+                ) {
+                    Text("Cancelar")
+                }
+            }
         )
     }
 }
