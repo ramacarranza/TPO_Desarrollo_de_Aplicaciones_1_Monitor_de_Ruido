@@ -1,7 +1,14 @@
 # Monitor de ruido IIoT — Sound Friendly Workplace
 
 Trabajo práctico de **Desarrollo de Aplicaciones 1** (UADE, 2026).
-Equipo: Antonella Ponce (UI/UX), Victoria Rodriguez Burgos (arquitectura y persistencia) y Ramiro Carranza (dispositivo IoT y backend).
+
+## Equipo
+
+| Integrante | GitHub | Rol |
+| --- | --- | --- |
+| Antonella Ponce | [antonellaponce](https://github.com/antonellaponce) | UI/UX y app Android |
+| Victoria Rodriguez Burgos | [vickyrodriguez1](https://github.com/vickyrodriguez1) | Arquitectura y persistencia, app Android |
+| Ramiro Carranza | [ramacarranza](https://github.com/ramacarranza) | Dispositivo IoT y backend |
 
 Un sensor por sector mide el ruido en forma continua, calcula el nivel equivalente de cada minuto y lo envía a un backend.
 El backend calcula la **exposición del turno** según la Res. SRT 295/03 (85 dBA para 8 horas, tasa de intercambio de 3 dB),
@@ -30,7 +37,7 @@ Animaciones explicativas (en `presentacion/`):
 | `backend/db/migration/` | Esquema de la base y datos de demo (V1 a V5) |
 | `backend/api/` | Backend en Kotlin: ingesta MQTT, reglas de alertas, API REST y simulador |
 | `presentacion/` | Video de presentación (enlace en este README), animaciones explicativas y material de la defensa |
-| `app/` | App Android (se agrega cuando esté lista) |
+| `app/` | App Android en Kotlin (consume la API REST del backend) |
 
 ## Dispositivo
 
