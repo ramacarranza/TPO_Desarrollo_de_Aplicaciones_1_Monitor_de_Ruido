@@ -68,6 +68,25 @@ sectores en distintos estados. Se desactiva con la variable de entorno `SIMULADO
 
 Para verificar que está funcionando, abrir `http://localhost:8080/health`.
 
+## Cómo correr la app
+
+Requisitos: Android Studio, el backend levantado y un celular Android con la depuración USB activada (o un emulador).
+
+1. En Android Studio, abrir la carpeta `app/` (contiene el proyecto Android completo; el módulo también se llama `app`).
+2. Conectar el celular por USB y crear el túnel hacia el backend:
+   ```
+   adb reverse tcp:8080 tcp:8080
+   ```
+   (`adb.exe` está en `%LOCALAPPDATA%\Android\Sdk\platform-tools`; si hay varios dispositivos conectados, agregar `-s <número de serie>`.)
+   Con el túnel, `http://localhost:8080` dentro del teléfono apunta al backend de la PC, en cualquier red. Hay que repetirlo cada vez que se reconecta el celular.
+3. Verificar en el navegador del celular que `http://localhost:8080/health` responde.
+4. Elegir el dispositivo en Android Studio y ejecutar con Run.
+
+La URL del backend está en `app/app/src/main/java/com/example/soundfriendlyworkplace/data/remote/RetrofitClient.kt` (`BASE_URL`).
+Sin túnel se puede usar `http://10.0.2.2:8080/` en el emulador o `http://<IP de la PC>:8080/` en un celular de la misma red.
+
+La app usa Retrofit para consumir la API, Room para guardar sectores y alertas sin conexión, y Jetpack Compose para las pantallas.
+
 ## API REST (base `/api/v1`, sin autenticación)
 
 | Método | Ruta | Para qué |

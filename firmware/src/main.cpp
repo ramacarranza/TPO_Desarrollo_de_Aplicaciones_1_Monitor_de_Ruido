@@ -28,7 +28,7 @@
 #define AJUSTAR_RTC 0   // 1 = grabar en el RTC la hora de compilación (en UTC). Subir una vez y volver a 0.
 
 const char*   DEVICE_ID   = "nm-001";
-const char*   FW_VERSION  = "0.4.0";
+const char*   FW_VERSION  = "0.4.1";
 const int32_t TZ_OFFSET_S = -3 * 3600;        // Argentina (solo para mostrar la hora local)
 
 const adc1_channel_t MIC_CH = ADC1_CHANNEL_6; // GPIO34
@@ -331,7 +331,9 @@ static void compactarCola() {
   }
 }
 
-// Envía un lote por segundo (como máximo) mientras haya pendientes y conexión
+// Envía un lote por segundo (como máximo) mientras haya pendientes y conexión.
+// Lotes de 10 mediciones (~1,8 KB): con señal débil se confirman al primer intento.
+static const int LOTE_MAX = 10;
 static void vaciarCola() {
   if (!sdOk || pendientes == 0 || !mqtt.connected()) return;
   if (millis() - ultimoLoteMs < 1000) return;
@@ -344,7 +346,7 @@ static void vaciarCola() {
   int n = snprintf(lote, sizeof(lote), "{\"v\":1,\"device_id\":\"%s\",\"items\":[", DEVICE_ID);
   int items = 0;
   uint32_t nuevoOffset = colaOffset;
-  while (items < 20 && f.available()) {
+  while (items < LOTE_MAX && f.available()) {
     String l = f.readStringUntil('\n');
     l.trim();
     uint32_t pos = f.position();
@@ -361,7 +363,7 @@ static void vaciarCola() {
     return;
   }
   snprintf(lote + n, sizeof(lote) - n, "]}");
-  if (mqtt.publish(tLote, lote, false, 1)) {    // bloquea hasta el PUBACK (máx. 2 s)
+  if (mqtt.publish(tLote, lote, false, 1)) {    // bloquea hasta el PUBACK (máx. 5 s)
     colaOffset = nuevoOffset;
     guardarOffset();
     pendientes = (pendientes > (uint32_t)items) ? pendientes - items : 0;
@@ -484,7 +486,7 @@ void setup() {
   snprintf(tLote,     sizeof(tLote),     "ruido/v1/%s/lote",     DEVICE_ID);
   mqtt.begin(mqttHost, MQTT_PORT, netMqtt);
   mqtt.setKeepAlive(60);
-  mqtt.setTimeout(2000);                  // espera máxima del PUBACK
+  mqtt.setTimeout(5000);                  // espera máxima del PUBACK (5 s: tolera WiFi con señal débil)
   Serial.printf("MQTT: broker %s:%d (cambiar con: m<IP> + Enter)\n", mqttHost, MQTT_PORT);
 
   iniciarADC();

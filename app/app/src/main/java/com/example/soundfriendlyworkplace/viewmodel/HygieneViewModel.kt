@@ -94,6 +94,7 @@ class HygieneViewModel(
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
+                android.util.Log.e("SFW-API", "Error al cargar sectores", e)
                 SectoresUiState.Error(
                     "No se pudieron cargar los sectores y no hay datos guardados."
                 )
