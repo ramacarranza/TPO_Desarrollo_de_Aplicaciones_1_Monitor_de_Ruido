@@ -329,7 +329,8 @@ private fun TarjetaAlerta(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(30.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF5C35A0)
+                containerColor = Color(0xFF5C35A0),
+                contentColor = Color.White   // texto blanco: se lee bien sobre el violeta
             )
         ) {
             Text("Ver detalle de alerta")

@@ -110,6 +110,11 @@ fun HygieneAlertDetailScreen(
                     errorReconocimiento = alertaViewModel.errorReconocimiento,
                     onReconocer = { nombre ->
                         alertaViewModel.reconocerAlerta(alertaId, nombre)
+                    },
+                    registrandoIntervencion = alertaViewModel.registrandoIntervencion,
+                    errorIntervencion = alertaViewModel.errorIntervencion,
+                    onRegistrarIntervencion = { descripcion, responsable ->
+                        alertaViewModel.registrarIntervencion(alertaId, descripcion, responsable)
                     }
                 )
             }
@@ -142,10 +147,16 @@ private fun HygieneAlertDetailContent(
     desdeCache: Boolean = false,
     reconociendo: Boolean = false,
     errorReconocimiento: String? = null,
-    onReconocer: (String) -> Unit = {}
+    onReconocer: (String) -> Unit = {},
+    registrandoIntervencion: Boolean = false,
+    errorIntervencion: String? = null,
+    onRegistrarIntervencion: (String, String) -> Unit = { _, _ -> }
 ) {
     var mostrarDialogo by remember { mutableStateOf(false) }
     var nombreUsuario by remember { mutableStateOf("") }
+    var mostrarDialogoIntervencion by remember { mutableStateOf(false) }
+    var descripcionIntervencion by remember { mutableStateOf("") }
+    var responsableIntervencion by remember { mutableStateOf("") }
 
     val colorAlerta = when (alerta.tipo) {
         "CRITICO" -> Color(0xFFC62828)
@@ -369,6 +380,145 @@ private fun HygieneAlertDetailContent(
             fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF2E7D32)
+        )
+    }
+
+    // Intervenciones registradas (solo vienen en el detalle con conexión)
+    val intervenciones = alerta.intervenciones.orEmpty()
+    if (intervenciones.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White, RoundedCornerShape(12.dp))
+                .border(1.dp, Color(0xFFDCD4E6), RoundedCornerShape(12.dp))
+                .padding(16.dp)
+        ) {
+            Text(
+                text = "Intervenciones",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                color = TextoPrincipal
+            )
+
+            intervenciones.forEach { intervencion ->
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Text(
+                    text = intervencion.descripcion,
+                    fontSize = 13.sp,
+                    color = TextoPrincipal
+                )
+
+                Text(
+                    text = listOfNotNull(
+                        intervencion.usuario,
+                        formatearFechaDetalle(intervencion.realizadaEn)
+                    ).joinToString(" · "),
+                    fontSize = 11.sp,
+                    color = TextoSecundario
+                )
+            }
+        }
+    }
+
+    // Una alerta crítica se resuelve registrando qué se hizo
+    if (alerta.tipo == "CRITICO" && alerta.estado != "RESUELTA") {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (desdeCache) {
+            Text(
+                text = "Necesitás conexión para registrar una intervención.",
+                fontSize = 12.sp,
+                color = TextoSecundario
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+        }
+
+        Button(
+            onClick = {
+                if (responsableIntervencion.isBlank()) responsableIntervencion = nombreUsuario
+                mostrarDialogoIntervencion = true
+            },
+            enabled = !desdeCache && !registrandoIntervencion,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(30.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFFC62828),
+                contentColor = Color.White
+            )
+        ) {
+            Text(
+                if (registrandoIntervencion) "Registrando..."
+                else "Registrar intervención"
+            )
+        }
+
+        if (errorIntervencion != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = errorIntervencion,
+                color = Color(0xFFC62828),
+                fontSize = 12.sp
+            )
+        }
+    }
+
+    if (mostrarDialogoIntervencion && alerta.estado != "RESUELTA") {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoIntervencion = false },
+            title = {
+                Text("Registrar intervención")
+            },
+            text = {
+                Column {
+                    Text("Describí la acción que se tomó en el sector.")
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = descripcionIntervencion,
+                        onValueChange = { descripcionIntervencion = it },
+                        label = { Text("Descripción") },
+                        minLines = 3
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = responsableIntervencion,
+                        onValueChange = { responsableIntervencion = it },
+                        label = { Text("Responsable") },
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onRegistrarIntervencion(
+                            descripcionIntervencion.trim(),
+                            responsableIntervencion.trim()
+                        )
+                        mostrarDialogoIntervencion = false
+                        descripcionIntervencion = ""
+                    },
+                    // el backend exige entre 5 y 2000 caracteres
+                    enabled = descripcionIntervencion.trim().length in 5..2000 && !registrandoIntervencion
+                ) {
+                    Text("Registrar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { mostrarDialogoIntervencion = false }
+                ) {
+                    Text("Cancelar")
+                }
+            }
         )
     }
 

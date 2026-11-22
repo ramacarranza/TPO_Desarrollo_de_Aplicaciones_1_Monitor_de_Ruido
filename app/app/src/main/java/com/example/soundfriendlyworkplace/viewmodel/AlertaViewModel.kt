@@ -9,6 +9,7 @@ import com.example.soundfriendlyworkplace.data.model.AlertaDto
 import com.example.soundfriendlyworkplace.data.repository.AlertaRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 sealed interface AlertasUiState {
     data object Cargando : AlertasUiState
@@ -56,6 +57,15 @@ class AlertaViewModel(
     var errorReconocimiento by mutableStateOf<String?>(null)
         private set
 
+    var registrandoIntervencion by mutableStateOf(false)
+        private set
+
+    var errorIntervencion by mutableStateOf<String?>(null)
+        private set
+
+    // Se conserva el id mientras la intervención no se confirme: un reintento reusa el mismo id.
+    private var idIntervencionPendiente: String? = null
+
     init {
         cargarAlertas()
     }
@@ -87,6 +97,45 @@ class AlertaViewModel(
                     "No se pudo reconocer la alerta. Verificá la conexión."
             } finally {
                 reconociendoAlerta = false
+            }
+        }
+    }
+
+    fun registrarIntervencion(alertaId: Int, descripcion: String, responsable: String) {
+        if (registrandoIntervencion) return
+
+        val idIntervencion = idIntervencionPendiente
+            ?: UUID.randomUUID().toString().also { idIntervencionPendiente = it }
+
+        viewModelScope.launch {
+            registrandoIntervencion = true
+            errorIntervencion = null
+
+            try {
+                val alertaActualizada = repository.registrarIntervencion(
+                    idIntervencion = idIntervencion,
+                    alertaId = alertaId,
+                    descripcion = descripcion,
+                    responsable = responsable.ifBlank { null }
+                )
+
+                idIntervencionPendiente = null
+
+                alertaDetalleUiState = AlertaDetalleUiState.Exito(
+                    alerta = alertaActualizada,
+                    desdeCache = false
+                )
+
+                cargarAlertas()
+
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                android.util.Log.e("SFW-API", "Error al registrar la intervención", e)
+                errorIntervencion =
+                    "No se pudo registrar la intervención. Verificá la conexión y volvé a intentar."
+            } finally {
+                registrandoIntervencion = false
             }
         }
     }

@@ -1,7 +1,9 @@
 package com.example.soundfriendlyworkplace.data.remote
 
 import com.example.soundfriendlyworkplace.data.model.AlertaDto
+import com.example.soundfriendlyworkplace.data.model.IntervencionDto
 import com.example.soundfriendlyworkplace.data.model.MedicionDto
+import com.example.soundfriendlyworkplace.data.model.NuevaIntervencionRequest
 import com.example.soundfriendlyworkplace.data.model.ReconocerAlertaRequest
 import com.example.soundfriendlyworkplace.data.model.SectorDto
 import retrofit2.http.GET
@@ -39,6 +41,12 @@ interface ApiService {
         @Path("id") alertaId: Int,
         @Body solicitud: ReconocerAlertaRequest
     ): AlertaDto
+
+    // Responde 201 la primera vez y 200 si se reenvía la misma intervención (mismo id).
+    @POST("api/v1/intervenciones")
+    suspend fun registrarIntervencion(
+        @Body solicitud: NuevaIntervencionRequest
+    ): IntervencionDto
 }
 
 

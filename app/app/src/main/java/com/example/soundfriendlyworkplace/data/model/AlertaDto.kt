@@ -15,7 +15,8 @@ data class AlertaDto(
     val resueltaPor: String?,
     val resueltaEn: String?,
     val actualizadoEn: String,
-    val intervenciones: List<IntervencionDto> = emptyList()
+    // Solo viene en el detalle (GET /alertas/{id}); en la lista llega nula.
+    val intervenciones: List<IntervencionDto>? = null
 )
 
 data class ReconocerAlertaRequest(

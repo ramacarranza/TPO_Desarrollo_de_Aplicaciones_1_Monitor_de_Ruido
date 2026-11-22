@@ -4,6 +4,7 @@ package com.example.soundfriendlyworkplace.data.repository
 import com.example.soundfriendlyworkplace.data.local.AlertaDao
 import com.example.soundfriendlyworkplace.data.local.AlertaEntity
 import com.example.soundfriendlyworkplace.data.model.AlertaDto
+import com.example.soundfriendlyworkplace.data.model.NuevaIntervencionRequest
 import com.example.soundfriendlyworkplace.data.model.ReconocerAlertaRequest
 import com.example.soundfriendlyworkplace.data.remote.ApiService
 import com.example.soundfriendlyworkplace.data.remote.RetrofitClient
@@ -63,11 +64,9 @@ class AlertaRepository(
             // Guardamos la alerta recibida.
             alertaDao.guardarAlertas(listOf(alerta.aEntity()))
 
-            val alertaGuardada = alertaDao.obtenerAlertaPorId(id)
-                ?: throw IllegalStateException("No se encontró la alerta guardada.")
-
+            // Room no guarda las intervenciones: se muestra la alerta tal como llegó del backend.
             ResultadoAlerta(
-                alerta = alertaGuardada.aDto(),
+                alerta = alerta,
                 desdeCache = false
             )
         } catch (e: CancellationException) {
@@ -94,6 +93,32 @@ class AlertaRepository(
                 reconocidaPor = reconocidaPor
             )
         )
+
+        alertaDao.guardarAlertas(
+            listOf(alertaActualizada.aEntity())
+        )
+
+        return alertaActualizada
+    }
+
+    // Registra una intervención y devuelve la alerta actualizada (con sus intervenciones).
+    // idIntervencion lo genera la app; reenviarlo con el mismo id no duplica la intervención.
+    suspend fun registrarIntervencion(
+        idIntervencion: String,
+        alertaId: Int,
+        descripcion: String,
+        responsable: String?
+    ): AlertaDto {
+        api.registrarIntervencion(
+            NuevaIntervencionRequest(
+                id = idIntervencion,
+                alertaId = alertaId,
+                descripcion = descripcion,
+                responsable = responsable
+            )
+        )
+
+        val alertaActualizada = api.obtenerAlertaPorId(alertaId)
 
         alertaDao.guardarAlertas(
             listOf(alertaActualizada.aEntity())
