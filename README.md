@@ -2,6 +2,8 @@
 
 Trabajo práctico de **Desarrollo de Aplicaciones 1** (UADE, 2026).
 
+**Video de presentación (6:52):** https://youtu.be/M5XdcESlPTg
+
 ## Equipo
 
 | Integrante | GitHub | Rol |
@@ -23,11 +25,6 @@ Sensor ESP32 ──WiFi/MQTT (QoS 1)──► Broker Mosquitto ──► Backend
                                                    TimescaleDB (PostgreSQL)
 ```
 
-Animaciones explicativas (en `presentacion/`):
-- [Cómo viaja una medición](presentacion/animacion_1_arquitectura.mp4)
-- [Corte de red sin pérdida de datos](presentacion/animacion_2_corte_de_red.mp4)
-- [Ciclo de vida de una alerta](presentacion/animacion_3_ciclo_de_alerta.mp4)
-
 ## Estructura del repositorio
 
 | Carpeta | Contenido |
@@ -36,7 +33,7 @@ Animaciones explicativas (en `presentacion/`):
 | `backend/` | Docker Compose (TimescaleDB, Mosquitto, Flyway), migraciones SQL y API en Ktor |
 | `backend/db/migration/` | Esquema de la base y datos de demo (V1 a V5) |
 | `backend/api/` | Backend en Kotlin: ingesta MQTT, reglas de alertas, API REST y simulador |
-| `presentacion/` | Video de presentación (enlace en este README), animaciones explicativas y material de la defensa |
+| `presentacion/` | Enlace al video de presentación, subtítulos y línea de tiempo de la edición |
 | `app/` | App Android en Kotlin (consume la API REST del backend) |
 
 ## Dispositivo

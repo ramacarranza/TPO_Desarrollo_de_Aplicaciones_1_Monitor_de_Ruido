@@ -1,0 +1,164 @@
+1
+00:01:00,100 --> 00:01:04,608
+Este es nuestro sensor: un ESP32
+con micrófono, tarjeta SD y reloj.
+
+2
+00:01:04,808 --> 00:01:09,317
+La SD guarda las mediciones sin red;
+el reloj conserva la hora.
+
+3
+00:01:09,517 --> 00:01:13,914
+Mide 17.630 veces por segundo
+y aplica la ponderación A, como un sonómetro.
+
+4
+00:01:14,114 --> 00:01:18,511
+Cada segundo calcula el nivel en dBA:
+si hay ruido, el valor sube.
+
+5
+00:01:18,711 --> 00:01:23,108
+Cada minuto envía el nivel equivalente
+(LAeq) al servidor.
+
+6
+00:01:23,308 --> 00:01:27,442
+El servidor recibe por MQTT una medición
+por minuto de cada sensor.
+
+7
+00:01:27,642 --> 00:01:31,775
+Cada medición se valida y se guarda
+en la base de datos TimescaleDB.
+
+8
+00:01:31,975 --> 00:01:36,108
+Si un mensaje llega repetido, se descarta:
+ningún minuto cuenta dos veces.
+
+9
+00:01:36,308 --> 00:01:42,477
+La app muestra el estado
+de cada sector de la planta.
+
+10
+00:01:42,677 --> 00:01:48,846
+Verde: normal. Amarillo: atención (80 %).
+Rojo: crítico (100 % del límite diario).
+
+11
+00:01:49,046 --> 00:01:55,215
+Prensas y Depósito usan sensores simulados;
+el Taller de prueba es el sensor real.
+
+12
+00:01:55,415 --> 00:02:01,585
+Cada sector muestra su nivel actual
+y el % del límite diario usado en el turno.
+
+13
+00:02:01,785 --> 00:02:07,954
+En el detalle se ve el gráfico
+de niveles del turno, minuto a minuto.
+
+14
+00:02:08,154 --> 00:02:14,323
+El porcentaje se calcula con el criterio
+de la Res. SRT 295/03.
+
+15
+00:02:14,523 --> 00:02:20,692
+Prensas superó el 100 % del límite diario:
+está en estado crítico.
+
+16
+00:02:48,892 --> 00:02:59,875
+Las alertas se crean solas al llegar
+al 80 % y al 100 % del límite diario.
+
+17
+00:03:00,075 --> 00:03:11,058
+La lista las ordena por gravedad:
+primero las críticas.
+
+18
+00:03:11,258 --> 00:03:22,242
+Depósito llegó al 80 %:
+una alerta de atención.
+
+19
+00:03:22,442 --> 00:03:33,425
+Una alerta de atención
+se cierra al reconocerla.
+
+20
+00:03:33,625 --> 00:03:44,608
+Quien la reconoce deja su nombre:
+queda registrado quién y cuándo.
+
+21
+00:03:44,808 --> 00:03:55,792
+Prensas superó el 100 %:
+una alerta crítica.
+
+22
+00:03:55,992 --> 00:04:06,975
+Una alerta crítica no se cierra
+solo con reconocerla.
+
+23
+00:04:07,175 --> 00:04:18,158
+Hay que registrar qué se hizo, por ejemplo
+entregar protectores auditivos.
+
+24
+00:04:18,358 --> 00:04:29,342
+Con la intervención registrada,
+la alerta queda resuelta.
+
+25
+00:04:29,542 --> 00:04:40,525
+Todo queda en el historial
+de alertas resueltas.
+
+26
+00:05:05,725 --> 00:05:13,265
+Prueba real: le cortamos el WiFi
+al sensor del Taller.
+
+27
+00:05:13,465 --> 00:05:21,004
+El sensor sigue midiendo
+y guarda cada minuto en la tarjeta SD.
+
+28
+00:05:21,204 --> 00:05:28,744
+El servidor detecta la desconexión
+y crea una alerta de sensor sin conexión.
+
+29
+00:05:28,944 --> 00:05:36,483
+La app avisa que los datos del Taller
+no están actualizados.
+
+30
+00:05:36,683 --> 00:05:47,733
+Al volver la red, el sensor
+envía todo lo que guardó.
+
+31
+00:05:47,933 --> 00:05:58,983
+La alerta de sensor sin conexión
+se resuelve sola.
+
+32
+00:05:59,183 --> 00:06:10,233
+El gráfico del Taller no tiene huecos:
+no se perdió ningún minuto.
+
+33
+00:06:10,433 --> 00:06:21,483
+En otra prueba recuperamos 12 horas
+de mediciones sin perder ni un minuto.
